@@ -5,10 +5,12 @@ public class Parser
 {
 	private String myInstruct;
 	private Scanner myReader;
+	private int lineNumber;
 
 	Parser(String fileName)
 	{
 		myInstruct = "";
+		lineNumber = 0;
 		try {
 			myReader = new Scanner(new File(fileName));
 		} catch (Exception e) {
@@ -34,7 +36,13 @@ public class Parser
 		if (hasMoreLines())
 		{
 			myInstruct = myReader.nextLine();
+			removeComment();
 			myInstruct = myInstruct.trim();
+			if (!myInstruct.equals("") && !instructionType().equals("L_INSTRUCTION"))
+			{
+				lineNumber++;
+				System.out.println("---------myInstruct: " + myInstruct + "\n---------lineNumber: " + lineNumber);
+			}
 			System.out.println("Instruction: " + myInstruct + "\nType: " + instructionType());
 			return myInstruct;
 		}
@@ -50,7 +58,9 @@ public class Parser
 	public String instructionType()
 	{
 		//return instruction type, or null if none
-		if (myInstruct == null || myInstruct.contains("/")) //check for null or comment
+		if (myInstruct == null || myInstruct.equals("")) //check for null
+			return null;
+		if (myInstruct.substring(0, 1).contains("/")) //check for leading comment
 			return null;
 		
 		if (myInstruct.contains("@"))
@@ -108,5 +118,17 @@ public class Parser
 		if (myInstruct.contains(";"))
 			return myInstruct.substring(myInstruct.indexOf(';')+1);
 		return null;
+	}
+
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
+
+	private void removeComment()
+	{
+		int index = myInstruct.indexOf('/');
+		if (index >= 0)
+			myInstruct = myInstruct.substring(0, index);
 	}
 }

@@ -25,6 +25,7 @@ public class Code
 
 	public String comp(String comp)
 	{
+		System.out.println("Untranslated Comp: [" + comp + "]");
 		switch (comp)
 		{
 			case "1":

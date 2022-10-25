@@ -23,8 +23,9 @@ public class HackAssembler
 			type = parse.instructionType();
 			if (type != null && type.equals("L_INSTRUCTION"))
 			{
-				table.addEntry(current, addressCounter);
-				addressCounter++;
+				table.addEntry(parse.symbol(), parse.getLineNumber());
+				System.out.println("------CURRENT: " + current + "\n------LINENUM: " + parse.getLineNumber());
+				System.out.println("***SYMBOL***: " + parse.symbol());
 			}
 		}
 
@@ -35,21 +36,26 @@ public class HackAssembler
 		//second pass
 		while(parse.hasMoreLines())
 		{
+			binary = "";
 			current = parse.advance();
 			type = parse.instructionType();
-			if (type != null && type.equals("A_INSTRUCTION"))
+			if (type != null && (type.equals("A_INSTRUCTION")))
 			{
 				//add symbol to table if not already present
 				symbol = parse.symbol();
-				if (!table.contains(symbol))
-				{
-					table.addEntry(symbol, addressCounter);
-					addressCounter++;
+				try {
+					Integer.parseInt(symbol);	
+				} catch (Exception e) {
+					if (!(table.contains(symbol)))
+					{
+						table.addEntry(symbol, addressCounter);
+						addressCounter++;
+					}
 				}
 
 				//translate symbol to binary value
 				System.out.println("Symbol: " + symbol);
-				binary = symToBin(symbol); //bin val
+				binary = symToBin(symbol, type, table); //bin val
 			}
 			else if (type != null && type.equals("C_INSTRUCTION"))
 			{
@@ -65,6 +71,7 @@ public class HackAssembler
 				comp = parse.comp();
 				String temp = comp;
 				comp = code.comp(comp); //bin
+				//System.out.println("Untranslated Comp: " + temp);
 				
 				//111a
 				if (temp.contains("M"))//if (current.contains("M") && !(current.contains(";") && current.indexOf("M") > current.indexOf(";"))) //contains an M that isn't the only thing left of ;
@@ -99,27 +106,17 @@ public class HackAssembler
 	/*
 	 * convert symbol to binary
 	 */
-	public static String symToBin(String symbol)
+	public static String symToBin(String symbol, String type, SymbolTable table)
 	{
-		int n = Integer.parseInt(symbol);
-		return "0" + decimalToBinary(n);
-
-		/*String bin = "0";
-		byte[] infoBin;
-        	try {
-			infoBin = symbol.getBytes("UTF-8");
-			for (byte b : infoBin) 
-				bin += Integer.toBinaryString(b);
-	
-			//add leading zeroes until 16 bit
-			while (bin.length() < 16)
-				bin = "0"+bin;
-			return bin;
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		try {
+			//
+			int n = Integer.parseInt(symbol);
+			return decimalToBinary(n);
+		} catch (Exception e) {
+			//variable or label
+			String temp = decimalToBinary(table.getAddress(symbol));
+			return temp;
 		}
-		return null;*/
 	}
 
 	public static String decimalToBinary(int num)
@@ -137,7 +134,7 @@ public class HackAssembler
 		}
 
 		//add leading zeroes
-		while (binary.length() < 15)
+		while (binary.length() < 16)
 			binary = "0" + binary;
 	
 		return binary;
