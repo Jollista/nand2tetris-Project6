@@ -48,6 +48,7 @@ public class HackAssembler
 				}
 
 				//translate symbol to binary value
+				System.out.println("Symbol: " + symbol);
 				binary = symToBin(symbol); //bin val
 			}
 			else if (type != null && type.equals("C_INSTRUCTION"))
@@ -55,14 +56,18 @@ public class HackAssembler
 				//translate each of the three fields to binary
 				//d
 				dest = parse.dest();
-				dest = code.dest(dest); //bin
+				if (dest == null)
+					dest = "000";
+				else
+					dest = code.dest(dest); //bin
 
 				//c
 				comp = parse.comp();
+				String temp = comp;
 				comp = code.comp(comp); //bin
 				
 				//111a
-				if (current.contains("M"))
+				if (temp.contains("M"))//if (current.contains("M") && !(current.contains(";") && current.indexOf("M") > current.indexOf(";"))) //contains an M that isn't the only thing left of ;
 					comp = "1" + comp;
 				else
 					comp = "0" + comp;
@@ -74,14 +79,19 @@ public class HackAssembler
 					jump = "000";
 				else
 					jump = code.jump(jump); //bin
+				
+				System.out.println("comp: " + comp + "\ndest: " + dest + "\njump: " + jump);
 
 				//assemble binary values into a string of sixteen 0's and 1's
 				binary = comp + dest + jump;
 			}
 
 			//write string to output file
-			System.out.println(binary);
-			writer.write(binary);
+			if (binary != null && binary != "")
+			{
+				System.out.println(binary);
+				writer.write(binary+"\n");
+			}
 		}
 		writer.close();
 	}
@@ -91,7 +101,10 @@ public class HackAssembler
 	 */
 	public static String symToBin(String symbol)
 	{
-		String bin = "0";
+		int n = Integer.parseInt(symbol);
+		return "0" + decimalToBinary(n);
+
+		/*String bin = "0";
 		byte[] infoBin;
         	try {
 			infoBin = symbol.getBytes("UTF-8");
@@ -106,6 +119,27 @@ public class HackAssembler
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return null;*/
+	}
+
+	public static String decimalToBinary(int num)
+	{
+		// Creating and assigning binary array size
+		String binary = "";
+	
+		// Number should be positive
+		while (num > 0) 
+		{
+			//System.out.println("Num: " + num);
+			binary = num % 2 + binary;
+			//System.out.println("Bin: " + binary);
+			num = num / 2;
+		}
+
+		//add leading zeroes
+		while (binary.length() < 15)
+			binary = "0" + binary;
+	
+		return binary;
 	}
 }

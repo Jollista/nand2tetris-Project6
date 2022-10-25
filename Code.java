@@ -8,6 +8,7 @@ public class Code
 			case "D":
 				return "010";
 			case "DM":
+			case "MD":
 				return "011";
 			case "A":
 				return "100";

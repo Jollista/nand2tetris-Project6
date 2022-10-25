@@ -34,7 +34,8 @@ public class Parser
 		if (hasMoreLines())
 		{
 			myInstruct = myReader.nextLine();
-			myInstruct.trim();
+			myInstruct = myInstruct.trim();
+			System.out.println("Instruction: " + myInstruct + "\nType: " + instructionType());
 			return myInstruct;
 		}
 		else
@@ -49,12 +50,12 @@ public class Parser
 	public String instructionType()
 	{
 		//return instruction type, or null if none
-		if (myInstruct == null) //check for null
+		if (myInstruct == null || myInstruct.contains("/")) //check for null or comment
 			return null;
 		
 		if (myInstruct.contains("@"))
 			return "A_INSTRUCTION";
-		if (myInstruct.contains("="))
+		if (myInstruct.contains("=") || myInstruct.contains(";"))
 			return "C_INSTRUCTION";
 		if (myInstruct.contains("("))
 			return "L_INSTRUCTION";
@@ -85,6 +86,8 @@ public class Parser
 		//return instruction's dest field
 		if (myInstruct.contains("="))
 			return myInstruct.substring(0, myInstruct.indexOf('='));
+		//if (myInstruct.contains(";"))
+		//	return myInstruct.substring(0, myInstruct.indexOf(';'));
 		return null;
 	}
 
@@ -93,7 +96,7 @@ public class Parser
 		//return instruction's comp field
 		int eq = myInstruct.indexOf('=');
 		if (eq < 0)
-			return null;
+			return myInstruct.substring(eq+1, myInstruct.indexOf(';'));
 		if (myInstruct.contains(";"))
 			return myInstruct.substring(eq+1, myInstruct.indexOf(';'));
 		return myInstruct.substring(eq+1);
